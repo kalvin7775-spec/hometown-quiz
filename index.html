@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>家鄉景觀與節慶測驗</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 15px;
+            padding-bottom: 30px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px 10px 25px;
+        }
+
+        .logo {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 800;
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #ccc;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .progress-box {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,215,0,0.3);
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .score-num {
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffd700, #ff8c00);
+            border-radius: 4px;
+            transition: width 0.3s;
+            width: 0%;
+        }
+
+        .question-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .q-number {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #1e3c72;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+        .q-text {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .opt-btn {
+            padding: 14px 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 12px;
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            font-size: 15px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .opt-btn:active {
+            transform: scale(0.98);
+        }
+
+        .opt-btn.selected {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            border-color: #4facfe;
+        }
+
+        .opt-btn.correct {
+            background: linear-gradient(135deg, #00c853, #00a844);
+            border-color: #00c853;
+        }
+
+        .opt-btn.wrong {
+            background: linear-gradient(135deg, #ff5252, #d32f2f);
+            border-color: #ff5252;
+        }
+
+        .opt-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        .submit-area {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #1e3c72;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .submit-btn:disabled {
+            background: #555;
+            color: #999;
+        }
+
+        .submit-btn:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        .hint {
+            text-align: center;
+            color: #aaa;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        .hint.ready {
+            color: #00c853;
+        }
+
+        /* 結果頁面 */
+        .result-page {
+            display: none;
+            text-align: center;
+            padding: 30px 15px;
+        }
+
+        .result-score {
+            font-size: 80px;
+            font-weight: 900;
+            color: #ffd700;
+            line-height: 1;
+        }
+
+        .result-label {
+            font-size: 20px;
+            color: #aaa;
+            margin-bottom: 25px;
+        }
+
+        .result-level {
+            display: inline-block;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .level-fail { background: linear-gradient(135deg, #ff5252, #d32f2f); }
+        .level-pass { background: linear-gradient(135deg, #ff9800, #f57c00); }
+        .level-good { background: linear-gradient(135deg, #4caf50, #2e7d32); }
+        .level-great { background: linear-gradient(135deg, #2196f3, #1565c0); }
+        .level-perfect { background: linear-gradient(135deg, #ffd700, #ff8c00); color: #1e3c72; }
+
+        .result-desc {
+            color: #ccc;
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 25px;
+            padding: 0 10px;
+        }
+
+        .result-stats {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .restart-btn {
+            padding: 16px 50px;
+            border: 2px solid #ffd700;
+            border-radius: 30px;
+            background: transparent;
+            color: #ffd700;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .restart-btn:active {
+            background: #ffd700;
+            color: #1e3c72;
+        }
+
+        .quiz-page {
+            display: block;
+        }
+
+        .start-page {
+            display: block;
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+        .start-btn {
+            padding: 20px 60px;
+            border: none;
+            border-radius: 30px;
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #1e3c72;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 30px;
+        }
+
+        .start-btn:active {
+            transform: scale(0.98);
+        }
+
+        .info-box {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .info-box p {
+            margin: 10px 0;
+            font-size: 15px;
+            color: #ddd;
+        }
+
+        .info-box strong {
+            color: #ffd700;
+        }
+    </style>
+</head>
+<body>
+    <!-- 開始頁面 -->
+    <div class="start-page" id="startPage">
+        <div class="header">
+            <div class="logo">📚</div>
+            <h1>家鄉景觀與節慶測驗</h1>
+            <p class="subtitle">測試你對家鄉的了解程度！</p>
+        </div>
+
+        <div class="info-box">
+            <p>📝 <strong>題目數量：</strong>隨機 10 題</p>
+            <p>⏱️ <strong>每題分數：</strong>10 分</p>
+            <p>🎯 <strong>滿分：</strong>100 分</p>
+            <p>📖 <strong>範圍：</strong>家鄉景觀、節慶文化</p>
+        </div>
+
+        <button class="start-btn" onclick="startQuiz()">🚀 開始測驗</button>
+    </div>
+
+    <!-- 測驗頁面 -->
+    <div class="quiz-page" id="quizPage" style="display:none;">
+        <div class="header">
+            <div class="logo">📝</div>
+            <h1>家鄉景觀與節慶測驗</h1>
+        </div>
+
+        <div class="progress-box">
+            <div class="progress-text">
+                <span>作答進度</span>
+                <span>已答：<span class="score-num" id="answered">0</span> / 10 題</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <div id="questionsContainer"></div>
+
+        <div class="submit-area">
+            <button class="submit-btn" id="submitBtn" onclick="showResult()" disabled>📊 查看成績</button>
+            <p class="hint" id="hint">請作答完所有題目</p>
+        </div>
+    </div>
+
+    <!-- 結果頁面 -->
+    <div class="result-page" id="resultPage">
+        <div class="logo">🎓</div>
+        <h1>測驗結果</h1>
+        <div class="result-score" id="finalScore">0</div>
+        <div class="result-label">分</div>
+        <div class="result-level" id="resultLevel">及格</div>
+        <p class="result-desc" id="resultDesc"></p>
+        
+        <div class="result-stats">
+            <div class="stat-row">
+                <span>✅ 答對題數</span>
+                <span id="correctCount">0 題</span>
+            </div>
+            <div class="stat-row">
+                <span>❌ 答錯題數</span>
+                <span id="wrongCount">0 題</span>
+            </div>
+            <div class="stat-row">
+                <span>📊 正確率</span>
+                <span id="accuracy">0%</span>
+            </div>
+        </div>
+
+        <button class="restart-btn" onclick="restart()">🔄 再測一次</button>
+    </div>
+
+    <script>
+        var allQuestions = [
+            {q: "家鄉景觀主要分為哪兩大類？", options: ["山地與平原", "自然與人文", "古代與現代", "城市與鄉村"], answer: 1},
+            {q: "下列哪一項屬於「自然景觀」？", options: ["廟宇", "森林", "車站", "官邸"], answer: 1},
+            {q: "高雄市「月世界」的特殊地形主要是由什麼造成的？", options: ["人工開鑿", "雨水與河水侵蝕", "地震斷層", "隕石撞擊"], answer: 1},
+            {q: "人文景觀主要是因為什麼而產生？", options: ["地殼變動", "氣候變化", "人為開發", "自然演化"], answer: 2},
+            {q: "「城」與「郭」的分別為何？", options: ["城是內牆，郭是外牆", "城是圓的，郭是方的", "城在南方，郭在北方", "城是官員住的，郭是百姓住的"], answer: 0},
+            {q: "屏東縣佳樂水的奇岩怪石屬於哪一類景觀？", options: ["人文景觀", "產業景觀", "自然景觀", "歷史景觀"], answer: 2},
+            {q: "下列何者是南投縣著名的湖光山色景觀？", options: ["碧潭", "日月潭", "澄清湖", "鯉魚潭"], answer: 1},
+            {q: "臺南市的大天后宮主要供奉哪位神明？", options: ["土地公", "關聖帝君", "媽祖", "孔子"], answer: 2},
+            {q: "「打狗英國領事館官邸」位於哪個城市？", options: ["臺北市", "臺中市", "臺南市", "高雄市"], answer: 3},
+            {q: "臺中市「磺溪書院」在早期社會主要扮演什麼角色？", options: ["軍事堡壘", "學校", "醫院", "銀行"], answer: 1},
+            {q: "哪一個自然景觀可以讓遊客感受到前人拓荒築路的艱辛？", options: ["墾丁公園", "清水斷崖", "陽明山", "阿里山"], answer: 1},
+            {q: "臺北市的「艋舺龍山寺」屬於哪一類景觀？", options: ["自然景觀", "人文景觀", "地形景觀", "氣候景觀"], answer: 1},
+            {q: "下列哪一項不是自然景觀形成的因素？", options: ["地形", "氣候", "建築技術", "河流"], answer: 2},
+            {q: "早期漁民出海捕魚前，會向海神祈求平安，這與哪種建築有關？", options: ["書院", "寺廟", "城郭", "洋樓"], answer: 1},
+            {q: "屏東縣「恆春古城」在古代具有什麼功能？", options: ["觀光", "防禦", "經商", "蓄水"], answer: 1},
+            {q: "下列何者屬於人文景觀中「先民開發的足跡」？", options: ["原始森林", "瀑布", "古老車站", "天然湖泊"], answer: 2},
+            {q: "位於新北市，適合乘船欣賞美景的湖泊是？", options: ["日月潭", "碧潭", "蘭潭", "翠峰湖"], answer: 1},
+            {q: "臺東森林公園內的景觀以什麼為主？", options: ["奇石", "茂盛森林", "斷崖", "古建築"], answer: 1},
+            {q: "認識家鄉景觀的主要目的是了解什麼？", options: ["房價漲跌", "生活樣貌與先民腳印", "交通流量", "天氣預報"], answer: 1},
+            {q: "建築於一百多年前的「打狗英國領事館官邸」特色是？", options: ["臺灣第一棟洋樓", "臺灣最高建築", "木造火車站", "石板橋"], answer: 0},
+            {q: "景觀會因為什麼因素而改變？", options: ["人為建設", "經濟發展", "自然災害", "以上皆是"], answer: 3},
+            {q: "臺中市「中央公園」的原址曾是什麼地方？", options: ["糖廠", "機場", "學校", "碼頭"], answer: 1},
+            {q: "導致「水湳機場」遷移的主要原因是什麼？", options: ["發生大地震", "噪音干擾", "被都市建築包圍且空間不足", "地下水枯竭"], answer: 2},
+            {q: "新北市「山佳車站」轉型後成為什麼？", options: ["百貨公司", "煤礦與鐵道博物館", "市政府", "體育館"], answer: 1},
+            {q: "哪一個景觀曾因 921 地震毀損而後重建？", options: ["霧峰林家", "龍山寺", "恆春古城", "英國領事館"], answer: 0},
+            {q: "舊嘉義車站塔樓中央的巨型時鐘，功能是提醒民眾什麼？", options: ["運動", "守時", "喝水", "休息"], answer: 1},
+            {q: "舊嘉義車站內設置接水龍頭與洗臉盆，是為了提醒民眾養成什麼習慣？", options: ["節約用水", "生活清潔衛生", "游泳", "澆花"], answer: 1},
+            {q: "宜蘭縣「冬山河親水公園」的功能主要為何？", options: ["農業灌溉", "提供市民休閒娛樂", "挖掘煤礦", "停靠大型戰艦"], answer: 1},
+            {q: "「黃金瀑布」呈現金黃色的主要原因為何？", options: ["人工染色", "雨水與礦物接觸", "藻類生長", "燈光照射"], answer: 1},
+            {q: "宜蘭縣「武暖石板橋」在早期社會的功能是？", options: ["觀光景點", "運輸與銷售貨物的要道", "祭祀中心", "軍事演習場"], answer: 1},
+            {q: "舊嘉義車站塔樓兩旁的裝飾，反映了家鄉哪些特產？", options: ["魚與蝦", "蓮霧、石榴、香蕉、鳳梨", "蘋果與葡萄", "稻米與小麥"], answer: 1},
+            {q: "高美濕地現在提倡的保護規範是什麼？", options: ["可以隨意捕捉生物", "只能觀賞，不可踩踏捕捉", "開發為遊樂園", "填海造陸"], answer: 1},
+            {q: "臺南市「仁德糖廠」轉型後成為什麼？", options: ["購物中心", "十鼓文化藝術村", "住宅區", "垃圾掩埋場"], answer: 1},
+            {q: "臺南市「小西門」目前保存在哪裡？", options: ["臺南市政府", "成功大學校園", "歷史博物館", "原址原地"], answer: 1},
+            {q: "為什麼有些景觀需要「轉型」？", options: ["因為功能不再適合現代生活", "為了吸引更多外國人", "因為建築太舊必須拆除", "為了增加政府收入"], answer: 0},
+            {q: "霧峰林家建築重建後，呈現出什麼樣的氛圍？", options: ["現代簡約", "豪門世家的氣派", "戰地的緊張感", "荒野的原始感"], answer: 1},
+            {q: "山佳車站旁的「新車站」與「舊車站」並存，代表什麼意義？", options: ["浪費空間", "交通繁忙", "景觀與功能的延續與轉型", "車站蓋錯了"], answer: 2},
+            {q: "景觀與居民生活的關係是？", options: ["互不相干", "息息相關", "只有休假才有關係", "只有老人有關係"], answer: 1},
+            {q: "維護家鄉景觀是誰的責任？", options: ["只有政府", "只有警察", "每一個居民", "只有觀光客"], answer: 2},
+            {q: "透過轉型後的景觀，我們可以學到什麼？", options: ["如何賺錢", "先民的智慧與生活歷史", "如何蓋新大樓", "完美的攝影技巧"], answer: 1},
+            {q: "下列哪一個不是調查家鄉景觀的管道？", options: ["介紹手冊", "旅遊服務中心", "觀光旅遊網", "餐廳菜單"], answer: 3},
+            {q: "調查景觀時，「實地路查」的意思是？", options: ["在地圖上畫線", "親自到現場觀察與查訪", "坐在家裡看影片", "聽別人講故事"], answer: 1},
+            {q: "臺北市新北投車站是怎麼形成的？", options: ["全新建造", "由舊車站修復重組而成", "模仿日本車站蓋的", "地震後自動出現的"], answer: 1},
+            {q: "金門「得月樓」的興建者是誰？", options: ["鄭成功", "黃輝煌", "林獻堂", "丘逢甲"], answer: 1},
+            {q: "「得月樓」興建的年代大約是？", options: ["西元 1800 年", "西元 1931 年", "西元 1999 年", "西元 2020 年"], answer: 1},
+            {q: "得月樓牆面的「槍眼」具有什麼功能？", options: ["通風", "架槍瞄準抵抗海盜", "晾衣服", "給鳥築巢"], answer: 1},
+            {q: "「寫在牆上的故事」中，提到的「竣工誌」作用為何？", options: ["紀錄學生成績", "紀錄建築由來與故事", "標示逃生路線", "宣傳校長政績"], answer: 1},
+            {q: "探究小祕訣的第一步是什麼？", options: ["提出問題", "分析資料", "觀察與發現", "提出觀點"], answer: 2},
+            {q: "調查時發現建築物上有「逃生密道」，這最可能反映當時什麼狀況？", options: ["治安不好", "為了玩遊戲", "為了通風", "為了送外賣"], answer: 0},
+            {q: "在「探究小祕訣」中，最後一步「提出自己的觀點」目的是？", options: ["批評別人", "增加考試分數", "分享發現並賦予意義", "完成作業"], answer: 2},
+            {q: "漢人傳統習俗中，哪一天全家會團圓吃年夜飯？", options: ["初一", "初五", "除夕", "元宵"], answer: 2},
+            {q: "「守歲」習俗中，將紅包壓在枕頭底下是為了什麼？", options: ["招財神、保平安", "怕被偷", "增加利息", "方便取用"], answer: 0},
+            {q: "農曆正月初一的主要活動是什麼？", options: ["回娘家", "拜年", "迎財神", "開工"], answer: 1},
+            {q: "哪一天是漢人傳統習俗中的「回娘家」？", options: ["初一", "初二", "初三", "初四"], answer: 1},
+            {q: "農曆正月初四通常會進行什麼宗教活動？", options: ["迎財神", "掃墓", "划龍舟", "賞月"], answer: 0},
+            {q: "農曆正月初五對於商店來說是什麼日子？", options: ["公休", "尾牙", "開工", "中元"], answer: 2},
+            {q: "清明節的主要意義是什麼？", options: ["慶祝豐收", "追思祭祖", "驅邪避邪", "祈求財運"], answer: 1},
+            {q: "端午節是在農曆的哪一天？", options: ["正月十五", "五月初五", "七月十五", "八月十五"], answer: 1},
+            {q: "下列哪一項不是端午節的習俗？", options: ["吃粽子", "划龍舟", "立蛋", "吃月餅"], answer: 3},
+            {q: "端午節在門口掛艾草、配戴香包的主要目的是？", options: ["裝飾房屋", "驅邪避邪、祈求好運", "紀念屈原", "增加香氣"], answer: 1},
+            {q: "中元節（農曆七月十五）的主要活動是什麼？", options: ["普渡", "賞月", "回娘家", "植樹"], answer: 0},
+            {q: "基隆中元祭會舉辦什麼活動替亡魂祈福？", options: ["划龍舟", "放水燈", "搶孤", "踩高蹺"], answer: 1},
+            {q: "中秋節吃月餅或柚子，象徵什麼意義？", options: ["步步高升", "月圓人團圓", "長命百歲", "財源廣進"], answer: 1},
+            {q: "金門中秋節有一種特別的娛樂活動，稱為什麼？", options: ["划龍舟", "博狀元餅", "放天燈", "炸寒單"], answer: 1},
+            {q: "宜蘭頭城與屏東恆春在中元節會舉辦什麼特色活動？", options: ["搶孤", "蜂炮", "繞境", "賽馬"], answer: 0},
+            {q: "阿美族最盛大的慶典是什麼？", options: ["飛魚祭", "戰祭", "豐年祭", "嬰兒祭"], answer: 2},
+            {q: "布農族「嬰兒祭」的主要意義是？", options: ["祈求戰鬥勝利", "祝福孩子平安長大", "慶祝捕魚豐收", "祭祀祖先"], answer: 1},
+            {q: "雅美族（達悟族）的「飛魚祭」大約從幾月開始？", options: ["1月", "3月", "8月", "10月"], answer: 1},
+            {q: "飛魚祭包含捕撈與食用的限制，這是在提醒族人什麼？", options: ["食物中毒", "資源永續、與環境共存", "練習游泳", "遵守法律"], answer: 1},
+            {q: "鄒族的「戰祭」目的是什麼？", options: ["慶祝結婚", "祈求戰鬥力量並激勵士氣", "祈求降雨", "慶祝成年"], answer: 1},
+            {q: "苗栗縣三義鄉的特色節慶活動是？", options: ["國際木雕藝術節", "媽祖繞境", "潑水節", "風箏節"], answer: 0},
+            {q: "三義木雕藝術節是從什麼發展而來的？", options: ["宗教祭典", "地方產業", "政府命令", "外國文化"], answer: 1},
+            {q: "臺中市大甲區鎮瀾宮每年農曆三月會舉辦什麼活動？", options: ["豐年祭", "媽祖繞境進香", "木雕展", "跨年晚會"], answer: 1},
+            {q: "大甲媽祖繞境活動約有多少年的歷史？", options: ["十年", "五十年", "數百年", "一千年"], answer: 2},
+            {q: "透過原住民族的祭典，我們可以體會到什麼？", options: ["先民的生活智慧與文化延續", "如何打獵", "如何跳舞", "如何煮飛魚"], answer: 0},
+            {q: "西方節日中，與家人團聚、相互贈禮表達關懷的是？", options: ["萬聖節", "聖誕節", "復活節", "感恩節"], answer: 1},
+            {q: "萬聖節的變裝活動，其起源背景類似漢人的什麼節慶？", options: ["春節", "中元節", "中秋節", "清明節"], answer: 1},
+            {q: "新住民帶來的「潑水節」，象徵什麼？", options: ["洗淨不順利、為明年祈福", "慶祝乾旱結束", "比賽誰的體力好", "節約用水"], answer: 0},
+            {q: "在臺北舉辦的「水燈節」主要是哪一類族群的傳統節慶？", options: ["漢人", "原住民", "新住民", "西方人"], answer: 2},
+            {q: "這些受外來文化影響的節慶，展現了家鄉什麼樣的面貌？", options: ["混亂", "多元與豐富", "昂貴", "單一文化"], answer: 1},
+            {q: "哪一天是國家的國慶日？", options: ["1月1日", "2月28日", "10月10日", "12月25日"], answer: 2},
+            {q: "「元旦」是指哪一天？", options: ["農曆初一", "1月1日", "12月31日", "立春"], answer: 1},
+            {q: "慶祝跨年晚會並迎接新的一年，是許多國家共同的什麼？", options: ["宗教", "節日", "秘密", "負擔"], answer: 1},
+            {q: "下列哪一個節日屬於「提倡觀念」的節日？", options: ["春節", "世界地球日", "聖誕節", "端午節"], answer: 1},
+            {q: "每年的 12 月 10 日是什麼日子？", options: ["世界地球日", "國際人權日", "國慶日", "聖誕節"], answer: 1},
+            {q: "國際人權日的設立是為了提醒我們什麼？", options: ["多運動", "人人生而平等、不要有歧視", "準時交作業", "節約用電"], answer: 1},
+            {q: "「世界地球日」是在每年的哪一天？", options: ["3月12日", "4月22日", "6月5日", "9月21日"], answer: 1},
+            {q: "學校舉辦「兒童節」活動的主要目的是？", options: ["增加考試", "給予關懷與歡樂", "讓老師休息", "清理校園"], answer: 1},
+            {q: "母親節是在每年的幾月？", options: ["五月第二個星期日", "八月八日", "九月二十八日", "三月八日"], answer: 0},
+            {q: "父親節是在每年的哪一天？", options: ["5月10日", "8月8日", "9月28日", "12月25日"], answer: 1},
+            {q: "設立「祖父母節」是為了鼓勵學生做什麼？", options: ["跟祖父母拿紅包", "帶祖父母去運動", "與祖父母相處、表達敬愛", "幫祖父母寫作業"], answer: 2},
+            {q: "每年的 9 月 28 日教師節是為了紀念誰？", options: ["孟子", "孔子", "國父", "校長"], answer: 1},
+            {q: "12 月 25 日在臺灣除了是聖誕節，也是什麼日子？", options: ["行憲紀念日", "勞動節", "青年節", "婦女節"], answer: 0},
+            {q: "下列哪一項屬於「職業或特定身分」的節日？", options: ["國慶日", "建築師節", "世界地球日", "中元節"], answer: 1},
+            {q: "觀察行事曆可以發現，節慶活動與我們的生活有什麼關係？", options: ["完全沒關係", "是日常生活的一部分", "只有放假有關係", "只有學生有關係"], answer: 1},
+            {q: "探究節慶由來時，若想知道「以前 12/25 為什麼放假」，最快的方式是？", options: ["訪問長輩", "擲跤", "睡覺思考", "猜測"], answer: 0},
+            {q: "節慶活動會隨著什麼而改變？", options: ["天氣", "人們的交流與社會發展", "老師的心情", "電視頻道"], answer: 1},
+            {q: "想要深入了解某個節慶，可以利用哪些工具？", options: ["書籍", "網路", "訪談", "以上皆是"], answer: 3},
+            {q: "多元節慶的存在意義在於？", options: ["讓假期變多", "包容不同文化、豐富生活", "讓生意更好做", "增加考試題目"], answer: 1},
+            {q: "認識家鄉的景觀與節慶，最後我們應該具備什麼樣的態度？", options: ["隨便", "珍惜與愛護", "競爭", "遺忘"], answer: 1}
+        ];
+
+        var selectedQuestions = [];
+        var userAnswers = {};
+        var totalQuestions = 10;
+
+        function shuffle(array) {
+            for (var i = array.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
+            return array;
+        }
+
+        function startQuiz() {
+            var shuffled = shuffle(allQuestions.slice());
+            selectedQuestions = shuffled.slice(0, totalQuestions);
+            userAnswers = {};
+
+            renderQuestions();
+
+            document.getElementById('startPage').style.display = 'none';
+            document.getElementById('quizPage').style.display = 'block';
+            document.getElementById('resultPage').style.display = 'none';
+            window.scrollTo(0, 0);
+        }
+
+        function renderQuestions() {
+            var container = document.getElementById('questionsContainer');
+            var html = '';
+
+            for (var i = 0; i < selectedQuestions.length; i++) {
+                var q = selectedQuestions[i];
+                html += '<div class="question-card" id="card-' + i + '">';
+                html += '<div class="q-number">第 ' + (i + 1) + ' 題</div>';
+                html += '<div class="q-text">' + q.q + '</div>';
+                html += '<div class="options">';
+                
+                var labels = ['A', 'B', 'C', 'D'];
+                for (var j = 0; j < q.options.length; j++) {
+                    html += '<button class="opt-btn" data-q="' + i + '" data-opt="' + j + '" onclick="selectAnswer(' + i + ',' + j + ')">';
+                    html += '(' + labels[j] + ') ' + q.options[j];
+                    html += '</button>';
+                }
+                
+                html += '</div></div>';
+            }
+
+            container.innerHTML = html;
+            updateProgress();
+        }
+
+        function selectAnswer(qIndex, optIndex) {
+            var buttons = document.querySelectorAll('#card-' + qIndex + ' .opt-btn');
+            for (var i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove('selected');
+            }
+
+            var selectedBtn = document.querySelector('#card-' + qIndex + ' .opt-btn[data-opt="' + optIndex + '"]');
+            selectedBtn.classList.add('selected');
+
+            userAnswers[qIndex] = optIndex;
+            updateProgress();
+        }
+
+        function updateProgress() {
+            var count = Object.keys(userAnswers).length;
+            document.getElementById('answered').textContent = count;
+            document.getElementById('progressFill').style.width = (count / totalQuestions * 100) + '%';
+
+            var btn = document.getElementById('submitBtn');
+            var hint = document.getElementById('hint');
+
+            if (count === totalQuestions) {
+                btn.disabled = false;
+                hint.textContent = '已完成所有題目！';
+                hint.className = 'hint ready';
+            } else {
+                btn.disabled = true;
+                hint.textContent = '還剩 ' + (totalQuestions - count) + ' 題未作答';
+                hint.className = 'hint';
+            }
+        }
+
+        function showResult() {
+            var correct = 0;
+
+            for (var i = 0; i < selectedQuestions.length; i++) {
+                var buttons = document.querySelectorAll('#card-' + i + ' .opt-btn');
+                var correctAnswer = selectedQuestions[i].answer;
+                var userAnswer = userAnswers[i];
+
+                for (var j = 0; j < buttons.length; j++) {
+                    buttons[j].disabled = true;
+                    if (j === correctAnswer) {
+                        buttons[j].classList.add('correct');
+                    }
+                    if (j === userAnswer && userAnswer !== correctAnswer) {
+                        buttons[j].classList.add('wrong');
+                    }
+                }
+
+                if (userAnswer === correctAnswer) {
+                    correct++;
+                }
+            }
+
+            var score = correct * 10;
+            var wrong = totalQuestions - correct;
+
+            var level, levelClass, desc;
+            if (score < 60) {
+                level = "😢 需加強";
+                levelClass = "level-fail";
+                desc = "沒在看書喔！要多多複習，下次一定可以更好！";
+            } else if (score < 80) {
+                level = "😊 及格";
+                levelClass = "level-pass";
+                desc = "有及格，但還要多努力！繼續加油！";
+            } else if (score < 90) {
+                level = "👍 不錯";
+                levelClass = "level-good";
+                desc = "還可以，可以更好一點！再接再厲！";
+            } else if (score < 100) {
+                level = "🌟 很棒";
+                levelClass = "level-great";
+                desc = "很棒！但差一點就100分了，好可惜！";
+            } else {
+                level = "🏆 好棒棒";
+                levelClass = "level-perfect";
+                desc = "太厲害了！滿分！你是家鄉知識小達人！";
+            }
+
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('resultLevel').textContent = level;
+            document.getElementById('resultLevel').className = 'result-level ' + levelClass;
+            document.getElementById('resultDesc').textContent = desc;
+            document.getElementById('correctCount').textContent = correct + ' 題';
+            document.getElementById('wrongCount').textContent = wrong + ' 題';
+            document.getElementById('accuracy').textContent = (correct * 10) + '%';
+
+            document.getElementById('quizPage').style.display = 'none';
+            document.getElementById('resultPage').style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        function restart() {
+            document.getElementById('startPage').style.display = 'block';
+            document.getElementById('quizPage').style.display = 'none';
+            document.getElementById('resultPage').style.display = 'none';
+            window.scrollTo(0, 0);
+        }
+    </script>
+</body>
+</html>
