@@ -65,75 +65,124 @@
         .answer-text { color: #ddd; }
         .perfect-msg { text-align: center; padding: 20px; background: rgba(0,200,83,0.2); border-radius: 12px; margin-top: 20px; margin-bottom: 25px; }
         .perfect-msg p { font-size: 16px; color: #00c853; }
+        
+        /* 新增：滿分慶祝區塊樣式 */
+        .celebration-box {
+            background: linear-gradient(135deg, rgba(255,215,0,0.3), rgba(255,140,0,0.3));
+            border: 3px solid #ffd700;
+            border-radius: 20px;
+            padding: 25px 15px;
+            margin: 20px 0;
+            text-align: center;
+            animation: glow 1.5s ease-in-out infinite alternate;
+        }
+        @keyframes glow {
+            from { box-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700; }
+            to { box-shadow: 0 0 20px #ffd700, 0 0 40px #ff8c00; }
+        }
+        .celebration-title {
+            font-size: 32px;
+            font-weight: 900;
+            color: #ffd700;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            animation: bounce 0.6s ease infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .celebration-emoji {
+            font-size: 50px;
+            margin-bottom: 15px;
+            animation: spin 2s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(10deg) scale(1.1); }
+            50% { transform: rotate(0deg) scale(1); }
+            75% { transform: rotate(-10deg) scale(1.1); }
+            100% { transform: rotate(0deg) scale(1); }
+        }
+        .video-container {
+            margin: 20px auto;
+            max-width: 100%;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .video-container video {
+            width: 100%;
+            max-height: 400px;
+            display: block;
+            background: #000;
+        }
+        .video-hint {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="start-page" id="startPage">
         <div class="header"><div class="logo">📚</div><h1>家鄉景觀與節慶測驗</h1><p class="subtitle">測試你對家鄉的了解程度！</p></div>
-        <div class="info-box"><p>📝 <strong>題目數量：</strong>隨機 10 題</p><p>⏱️ <strong>每題分數：</strong>10 分</p><p>🎯 <strong>滿分：</strong>100 分</p><p>📖 <strong>範圍：</strong>家鄉景觀、節慶文化</p></div>
-        <button class="start-btn" onclick="startQuiz()">🚀 開始測驗</button>
+        <div class="info-box"><p>📝 本測驗共 <strong>10 題</strong></p><p>🎯 每題 <strong>10 分</strong>，滿分 100 分</p><p>🎲 題目從題庫隨機抽選</p><p>⏰ 沒有時間限制，請仔細作答</p></div>
+        <button class="start-btn" onclick="startQuiz()">開始測驗</button>
     </div>
-    <div class="quiz-page" id="quizPage" style="display:none;">
-        <div class="header"><div class="logo">📝</div><h1>家鄉景觀與節慶測驗</h1></div>
-        <div class="progress-box"><div class="progress-text"><span>作答進度</span><span>已答：<span class="score-num" id="answered">0</span> / 10 題</span></div><div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div></div>
+    <div id="quizPage" style="display:none;">
+        <div class="header"><div class="logo">✏️</div><h1>家鄉景觀與節慶測驗</h1></div>
+        <div class="progress-box"><div class="progress-text"><span>作答進度</span><span><span id="answered">0</span> / 10 題</span></div><div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div></div>
         <div id="questionsContainer"></div>
-        <div class="submit-area"><button class="submit-btn" id="submitBtn" onclick="showResult()" disabled>📊 查看成績</button><p class="hint" id="hint">請作答完所有題目</p></div>
+        <div class="submit-area"><button class="submit-btn" id="submitBtn" disabled onclick="showResult()">交卷並查看成績</button><p class="hint" id="hint">還剩 10 題未作答</p></div>
     </div>
     <div class="result-page" id="resultPage">
-        <div class="logo">🎓</div><h1>測驗結果</h1>
-        <div class="result-score" id="finalScore">0</div><div class="result-label">分</div>
-        <div class="result-level" id="resultLevel">及格</div>
-        <p class="result-desc" id="resultDesc"></p>
-        <div class="result-stats"><div class="stat-row"><span>✅ 答對題數</span><span id="correctCount">0 題</span></div><div class="stat-row"><span>❌ 答錯題數</span><span id="wrongCount">0 題</span></div><div class="stat-row"><span>📊 正確率</span><span id="accuracy">0%</span></div></div>
+        <div class="header"><div class="logo">🎊</div><h1>測驗結果</h1></div>
+        <div class="result-score" id="finalScore">0</div>
+        <div class="result-label">分</div>
+        <div class="result-level" id="resultLevel">等級</div>
+        <p class="result-desc" id="resultDesc">說明文字</p>
+        
+        <!-- 滿分慶祝區塊（預設隱藏） -->
+        <div class="celebration-box" id="celebrationBox" style="display:none;">
+            <div class="celebration-emoji">🎉🏆🎉</div>
+            <div class="celebration-title">阿內好棒棒！</div>
+            <div class="video-container">
+                <video id="celebrationVideo" controls playsinline webkit-playsinline preload="auto">
+                    <source src="celebration.mp4" type="video/mp4">
+                    您的瀏覽器不支援影片播放
+                </video>
+            </div>
+            <p class="video-hint">👆 點擊播放影片慶祝一下！</p>
+        </div>
+        
+        <div class="result-stats"><div class="stat-row"><span>✅ 答對</span><span id="correctCount">0 題</span></div><div class="stat-row"><span>❌ 答錯</span><span id="wrongCount">0 題</span></div><div class="stat-row"><span>📊 正確率</span><span id="accuracy">0%</span></div></div>
         <div class="wrong-section" id="wrongSection"></div>
         <button class="restart-btn" onclick="restart()">🔄 再測一次</button>
     </div>
     <script>
-        var allQuestions = [
-            {q:"家鄉景觀主要分為哪兩大類？",options:["山地與平原","自然與人文","古代與現代","城市與鄉村"],answer:1},
-            {q:"下列哪一項屬於「自然景觀」？",options:["廟宇","森林","車站","官邸"],answer:1},
-            {q:"高雄市「月世界」的特殊地形主要是由什麼造成的？",options:["人工開鑿","雨水與河水侵蝕","地震斷層","隕石撞擊"],answer:1},
-            {q:"人文景觀主要是因為什麼而產生？",options:["地殼變動","氣候變化","人為開發","自然演化"],answer:2},
-            {q:"「城」與「郭」的分別為何？",options:["城是內牆，郭是外牆","城是圓的，郭是方的","城在南方，郭在北方","城是官員住的，郭是百姓住的"],answer:0},
-            {q:"屏東縣佳樂水的奇岩怪石屬於哪一類景觀？",options:["人文景觀","產業景觀","自然景觀","歷史景觀"],answer:2},
-            {q:"下列何者是南投縣著名的湖光山色景觀？",options:["碧潭","日月潭","澄清湖","鯉魚潭"],answer:1},
-            {q:"臺南市的大天后宮主要供奉哪位神明？",options:["土地公","關聖帝君","媽祖","孔子"],answer:2},
-            {q:"「打狗英國領事館官邸」位於哪個城市？",options:["臺北市","臺中市","臺南市","高雄市"],answer:3},
-            {q:"臺中市「磺溪書院」在早期社會主要扮演什麼角色？",options:["軍事堡壘","學校","醫院","銀行"],answer:1},
-            {q:"哪一個自然景觀可以讓遊客感受到前人拓荒築路的艱辛？",options:["墾丁公園","清水斷崖","陽明山","阿里山"],answer:1},
-            {q:"臺北市的「艋舺龍山寺」屬於哪一類景觀？",options:["自然景觀","人文景觀","地形景觀","氣候景觀"],answer:1},
-            {q:"下列哪一項不是自然景觀形成的因素？",options:["地形","氣候","建築技術","河流"],answer:2},
-            {q:"早期漁民出海捕魚前，會向海神祈求平安，這與哪種建築有關？",options:["書院","寺廟","城郭","洋樓"],answer:1},
-            {q:"屏東縣「恆春古城」在古代具有什麼功能？",options:["觀光","防禦","經商","蓄水"],answer:1},
-            {q:"下列何者屬於人文景觀中「先民開發的足跡」？",options:["原始森林","瀑布","古老車站","天然湖泊"],answer:2},
-            {q:"位於新北市，適合乘船欣賞美景的湖泊是？",options:["日月潭","碧潭","蘭潭","翠峰湖"],answer:1},
-            {q:"臺東森林公園內的景觀以什麼為主？",options:["奇石","茂盛森林","斷崖","古建築"],answer:1},
-            {q:"認識家鄉景觀的主要目的是了解什麼？",options:["房價漲跌","生活樣貌與先民腳印","交通流量","天氣預報"],answer:1},
-            {q:"建築於一百多年前的「打狗英國領事館官邸」特色是？",options:["臺灣第一棟洋樓","臺灣最高建築","木造火車站","石板橋"],answer:0},
-            {q:"景觀會因為什麼因素而改變？",options:["人為建設","經濟發展","自然災害","以上皆是"],answer:3},
-            {q:"臺中市「中央公園」的原址曾是什麼地方？",options:["糖廠","機場","學校","碼頭"],answer:1},
-            {q:"導致「水湳機場」遷移的主要原因是什麼？",options:["發生大地震","噪音干擾","被都市建築包圍且空間不足","地下水枯竭"],answer:2},
-            {q:"新北市「山佳車站」轉型後成為什麼？",options:["百貨公司","煤礦與鐵道博物館","市政府","體育館"],answer:1},
-            {q:"哪一個景觀曾因 921 地震毀損而後重建？",options:["霧峰林家","龍山寺","恆春古城","英國領事館"],answer:0},
-            {q:"舊嘉義車站塔樓中央的巨型時鐘，功能是提醒民眾什麼？",options:["運動","守時","喝水","休息"],answer:1},
-            {q:"舊嘉義車站內設置接水龍頭與洗臉盆，是為了提醒民眾養成什麼習慣？",options:["節約用水","生活清潔衛生","游泳","澆花"],answer:1},
-            {q:"宜蘭縣「冬山河親水公園」的功能主要為何？",options:["農業灌溉","提供市民休閒娛樂","挖掘煤礦","停靠大型戰艦"],answer:1},
-            {q:"「黃金瀑布」呈現金黃色的主要原因為何？",options:["人工染色","雨水與礦物接觸","藻類生長","燈光照射"],answer:1},
-            {q:"宜蘭縣「武暖石板橋」在早期社會的功能是？",options:["觀光景點","運輸與銷售貨物的要道","祭祀中心","軍事演習場"],answer:1},
-            {q:"舊嘉義車站塔樓兩旁的裝飾，反映了家鄉哪些特產？",options:["魚與蝦","蓮霧、石榴、香蕉、鳳梨","蘋果與葡萄","稻米與小麥"],answer:1},
-            {q:"高美濕地現在提倡的保護規範是什麼？",options:["可以隨意捕捉生物","只能觀賞，不可踩踏捕捉","開發為遊樂園","填海造陸"],answer:1},
-            {q:"臺南市「仁德糖廠」轉型後成為什麼？",options:["購物中心","十鼓文化藝術村","住宅區","垃圾掩埋場"],answer:1},
-            {q:"臺南市「小西門」目前保存在哪裡？",options:["臺南市政府","成功大學校園","歷史博物館","原址原地"],answer:1},
-            {q:"為什麼有些景觀需要「轉型」？",options:["因為功能不再適合現代生活","為了吸引更多外國人","因為建築太舊必須拆除","為了增加政府收入"],answer:0},
-            {q:"霧峰林家建築重建後，呈現出什麼樣的氛圍？",options:["現代簡約","豪門世家的氣派","戰地的緊張感","荒野的原始感"],answer:1},
-            {q:"山佳車站旁的「新車站」與「舊車站」並存，代表什麼意義？",options:["浪費空間","交通繁忙","景觀與功能的延續與轉型","車站蓋錯了"],answer:2},
-            {q:"景觀與居民生活的關係是？",options:["互不相干","息息相關","只有休假才有關係","只有老人有關係"],answer:1},
-            {q:"維護家鄉景觀是誰的責任？",options:["只有政府","只有警察","每一個居民","只有觀光客"],answer:2},
-            {q:"透過轉型後的景觀，我們可以學到什麼？",options:["如何賺錢","先民的智慧與生活歷史","如何蓋新大樓","完美的攝影技巧"],answer:1},
-            {q:"下列哪一個不是調查家鄉景觀的管道？",options:["介紹手冊","旅遊服務中心","觀光旅遊網","餐廳菜單"],answer:3},
-            {q:"調查景觀時，「實地路查」的意思是？",options:["在地圖上畫線","親自到現場觀察與查訪","坐在家裡看影片","聽別人講故事"],answer:1},
-            {q:"臺北市新北投車站是怎麼形成的？",options:["全新建造","由舊車站修復重組而成","模仿日本車站蓋的","地震後自動出現的"],answer:1},
-            {q:"金門「得月樓」的興建者是誰？",options:["鄭成功","黃輝煌","林獻堂","丘逢甲"],answer:1},
+        var allQuestions=[
+            {q:"家鄉常見的地表樣貌，例如山、平原、河流等，統稱為什麼？",options:["建築","景觀","雕像","橋梁"],answer:1},
+            {q:"下列哪一項屬於「自然景觀」？",options:["廟宇","隧道","河流","水庫"],answer:2},
+            {q:"河流為什麼被歸類為「自然景觀」？",options:["因為是人工挖掘的","因為是自然形成的","因為有很多魚","因為有很多船"],answer:1},
+            {q:"水庫、堤防屬於哪一類景觀？",options:["自然景觀","人文景觀","想像景觀","虛擬景觀"],answer:1},
+            {q:"下列何者不是「人文景觀」？",options:["廟宇","學校","山","橋"],answer:2},
+            {q:"人文景觀的主要特色是什麼？",options:["沒有人為破壞","完全是天然的","有人為的設計與建造","不需要維護"],answer:2},
+            {q:"臺灣中央山脈位於臺灣哪一部分？",options:["東部","西部","中部","北部"],answer:2},
+            {q:"中央山脈的形成主要是因為什麼作用？",options:["河流沖刷","火山爆發","板塊擠壓","風化作用"],answer:2},
+            {q:"雪霸國家公園位於哪幾個縣市的交界？",options:["新北、臺北、桃園","苗栗、新竹、臺中","高雄、屏東、臺東","南投、嘉義、雲林"],answer:1},
+            {q:"玉山是臺灣的什麼？",options:["第二高峰","最高峰","最低峰","火山"],answer:1},
+            {q:"下列何者不是平原的特色？",options:["地勢平坦","適合耕種","坡度陡峭","多位於河流下游"],answer:2},
+            {q:"臺灣最大的平原是？",options:["蘭陽平原","屏東平原","臺中盆地","嘉南平原"],answer:3},
+            {q:"平原適合發展什麼產業？",options:["工業與農業","高山運動","深海捕魚","太空探險"],answer:0},
+            {q:"盆地的地形特徵是什麼？",options:["中間高四周低","中間低四周高","全部都是山","全部都是水"],answer:1},
+            {q:"下列哪一個是臺灣知名的盆地？",options:["蘭陽平原","臺北盆地","嘉南平原","屏東平原"],answer:1},
+            {q:"臺灣最長的河流是？",options:["淡水河","高屏溪","曾文溪","濁水溪"],answer:3},
+            {q:"河流對人類生活有什麼重要性？",options:["提供水源","利於交通","灌溉農田","以上皆是"],answer:3},
+            {q:"下列哪一個是臺灣著名的湖泊？",options:["日月潭","長江","太平洋","黃河"],answer:0},
+            {q:"海岸地形主要形成的原因是什麼？",options:["風和雨","海水沖刷與堆積","地震","火山噴發"],answer:1},
+            {q:"金門地區的閩南建築特色是什麼？",options:["巴洛克風格","燕尾脊、紅磚","日式木造","哥德式尖塔"],answer:1},
+            {q:"得月樓最初建造的目的是什麼？",options:["觀光旅遊","抵禦海盜","商業貿易","宗教祭祀"],answer:1},
             {q:"「得月樓」興建的年代大約是？",options:["西元 1800 年","西元 1931 年","西元 1999 年","西元 2020 年"],answer:1},
             {q:"得月樓牆面的「槍眼」具有什麼功能？",options:["通風","架槍瞄準抵抗海盜","晾衣服","給鳥築巢"],answer:1},
             {q:"「寫在牆上的故事」中，提到的「竣工誌」作用為何？",options:["紀錄學生成績","紀錄建築由來與故事","標示逃生路線","宣傳校長政績"],answer:1},
@@ -198,11 +247,62 @@
         function selectAnswer(qi,oi){var bs=document.querySelectorAll('#card-'+qi+' .opt-btn');for(var i=0;i<bs.length;i++)bs[i].classList.remove('selected');document.querySelector('#card-'+qi+' .opt-btn[data-opt="'+oi+'"]').classList.add('selected');userAnswers[qi]=oi;updateProgress();}
         function updateProgress(){var c=Object.keys(userAnswers).length;document.getElementById('answered').textContent=c;document.getElementById('progressFill').style.width=(c/totalQuestions*100)+'%';var b=document.getElementById('submitBtn'),h=document.getElementById('hint');if(c===totalQuestions){b.disabled=false;h.textContent='已完成所有題目！';h.className='hint ready';}else{b.disabled=true;h.textContent='還剩 '+(totalQuestions-c)+' 題未作答';h.className='hint';}}
         function showResult(){var correct=0,wrongQs=[],labels=['A','B','C','D'];for(var i=0;i<selectedQuestions.length;i++){var bs=document.querySelectorAll('#card-'+i+' .opt-btn'),ca=selectedQuestions[i].answer,ua=userAnswers[i];for(var j=0;j<bs.length;j++){bs[j].disabled=true;if(j===ca)bs[j].classList.add('correct');if(j===ua&&ua!==ca)bs[j].classList.add('wrong');}if(ua===ca)correct++;else wrongQs.push({num:i+1,question:selectedQuestions[i].q,yourAnswer:'('+labels[ua]+') '+selectedQuestions[i].options[ua],correctAnswer:'('+labels[ca]+') '+selectedQuestions[i].options[ca]});}
-        var score=correct*10,wrong=totalQuestions-correct,level,lc,desc;if(score<60){level="😢 需加強";lc="level-fail";desc="沒在看書喔！要多多複習，下次一定可以更好！";}else if(score<80){level="😊 及格";lc="level-pass";desc="有及格，但還要多努力！繼續加油！";}else if(score<90){level="👍 不錯";lc="level-good";desc="還可以，可以更好一點！再接再厲！";}else if(score<100){level="🌟 很棒";lc="level-great";desc="很棒！但差一點就100分了，好可惜！";}else{level="🏆 好棒棒";lc="level-perfect";desc="太厲害了！滿分！你是家鄉知識小達人！";}
-        document.getElementById('finalScore').textContent=score;document.getElementById('resultLevel').textContent=level;document.getElementById('resultLevel').className='result-level '+lc;document.getElementById('resultDesc').textContent=desc;document.getElementById('correctCount').textContent=correct+' 題';document.getElementById('wrongCount').textContent=wrong+' 題';document.getElementById('accuracy').textContent=(correct*10)+'%';
-        var ws=document.getElementById('wrongSection');if(wrongQs.length>0){var wh='<div class="wrong-title">❌ 答錯的題目（共 '+wrongQs.length+' 題）</div>';for(var k=0;k<wrongQs.length;k++){var wq=wrongQs[k];wh+='<div class="wrong-card"><div class="wrong-q-num">第 '+wq.num+' 題</div><div class="wrong-q-text">'+wq.question+'</div><div class="answer-row"><span class="answer-label your">你的答案：</span><span class="answer-text">'+wq.yourAnswer+'</span></div><div class="answer-row"><span class="answer-label correct">正確答案：</span><span class="answer-text">'+wq.correctAnswer+'</span></div></div>';}ws.innerHTML=wh;}else{ws.innerHTML='<div class="perfect-msg"><p>🎉 太棒了！全部答對，沒有答錯的題目！</p></div>';}
-        document.getElementById('quizPage').style.display='none';document.getElementById('resultPage').style.display='block';window.scrollTo(0,0);}
-        function restart(){document.getElementById('startPage').style.display='block';document.getElementById('quizPage').style.display='none';document.getElementById('resultPage').style.display='none';window.scrollTo(0,0);}
+        var score=correct*10,wrong=totalQuestions-correct,level,lc,desc;
+        if(score<60){level="😢 需加強";lc="level-fail";desc="沒在看書喔！要多多複習，下次一定可以更好！";}
+        else if(score<80){level="😊 及格";lc="level-pass";desc="有及格，但還要多努力！繼續加油！";}
+        else if(score<90){level="👍 不錯";lc="level-good";desc="還可以，可以更好一點！再接再厲！";}
+        else if(score<100){level="🌟 很棒";lc="level-great";desc="很棒！但差一點就100分了，好可惜！";}
+        else{level="🏆 阿內好棒棒";lc="level-perfect";desc="太厲害了！滿分！你是家鄉知識小達人！";}
+        
+        document.getElementById('finalScore').textContent=score;
+        document.getElementById('resultLevel').textContent=level;
+        document.getElementById('resultLevel').className='result-level '+lc;
+        document.getElementById('resultDesc').textContent=desc;
+        document.getElementById('correctCount').textContent=correct+' 題';
+        document.getElementById('wrongCount').textContent=wrong+' 題';
+        document.getElementById('accuracy').textContent=(correct*10)+'%';
+        
+        // 處理滿分慶祝區塊
+        var celebrationBox = document.getElementById('celebrationBox');
+        var celebrationVideo = document.getElementById('celebrationVideo');
+        
+        if(score === 100) {
+            // 顯示慶祝區塊
+            celebrationBox.style.display = 'block';
+            // 重新載入影片確保可以播放
+            celebrationVideo.load();
+        } else {
+            // 隱藏慶祝區塊
+            celebrationBox.style.display = 'none';
+        }
+        
+        var ws=document.getElementById('wrongSection');
+        if(wrongQs.length>0){
+            var wh='<div class="wrong-title">❌ 答錯的題目（共 '+wrongQs.length+' 題）</div>';
+            for(var k=0;k<wrongQs.length;k++){
+                var wq=wrongQs[k];
+                wh+='<div class="wrong-card"><div class="wrong-q-num">第 '+wq.num+' 題</div><div class="wrong-q-text">'+wq.question+'</div><div class="answer-row"><span class="answer-label your">你的答案：</span><span class="answer-text">'+wq.yourAnswer+'</span></div><div class="answer-row"><span class="answer-label correct">正確答案：</span><span class="answer-text">'+wq.correctAnswer+'</span></div></div>';
+            }
+            ws.innerHTML=wh;
+        }else{
+            ws.innerHTML='<div class="perfect-msg"><p>🎉 太棒了！全部答對，沒有答錯的題目！</p></div>';
+        }
+        document.getElementById('quizPage').style.display='none';
+        document.getElementById('resultPage').style.display='block';
+        window.scrollTo(0,0);
+        }
+        function restart(){
+            document.getElementById('startPage').style.display='block';
+            document.getElementById('quizPage').style.display='none';
+            document.getElementById('resultPage').style.display='none';
+            // 暫停並重置影片
+            var video = document.getElementById('celebrationVideo');
+            if(video) {
+                video.pause();
+                video.currentTime = 0;
+            }
+            window.scrollTo(0,0);
+        }
     </script>
 </body>
 </html>
